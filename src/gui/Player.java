@@ -185,7 +185,7 @@ public class Player extends BoardObject {
     }
 
     public void buyTitleDeed(int squareNumber) {
-
+        // nigga adawd
         int propertyPrice = gameBoard.getAllSquares().get(squareNumber).getPrice();
 
         if (wallet < propertyPrice) {
