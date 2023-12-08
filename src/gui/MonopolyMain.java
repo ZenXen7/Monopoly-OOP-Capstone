@@ -276,7 +276,7 @@ public class MonopolyMain extends JFrame{
         playerAssetsPanel.setLayout(c1);
 
         JPanel panelPlayer1 = new JPanel();
-        panelPlayer1.setBackground(Color.BLACK);
+        panelPlayer1.setBackground(Color.RED);
         playerAssetsPanel.add(panelPlayer1, "1");
         panelPlayer1.setLayout(null);
 
@@ -296,7 +296,7 @@ public class MonopolyMain extends JFrame{
         panelPlayer2.setLayout(null);
         c1.show(playerAssetsPanel, ""+nowPlaying);
 
-        JLabel panelPlayer2Title = new JLabel(playerName2 + "All Wealth");
+        JLabel panelPlayer2Title = new JLabel(playerName2 + " All Wealth");
         panelPlayer2Title.setForeground(Color.WHITE);
         panelPlayer2Title.setHorizontalAlignment(SwingConstants.CENTER);
         panelPlayer2Title.setBounds(0, 6, 240, 16);

@@ -20,7 +20,7 @@ public class Player extends BoardObject {
 
     private int currentSquareNumber = 0; // where player is currently located on (0 - 19). initially zero
     private ArrayList<Integer> titleDeeds = new ArrayList<Integer>(); // squares that the player has
-    private int wallet = 500; // initial money
+    private int wallet = 300; // initial money
 
     public ArrayList<Integer> getTitleDeeds() {
         return titleDeeds;
@@ -83,23 +83,46 @@ public class Player extends BoardObject {
         System.exit(0); // Terminate the game (you may want to handle this differently)
     }
 
-    private void sellProperties() {
-        // Implement property selling logic here
-        // For example, display a dialog to choose properties to sell
+// ... Existing code ...
 
+    // ... Existing code ...
+
+    private void sellProperties() {
+        // Get the properties that the player owns
         ArrayList<Integer> propertiesToSell = new ArrayList<>(titleDeeds);
-        int choice = JOptionPane.showOptionDialog(
+
+        // Check if the player has any properties to sell
+        if (propertiesToSell.isEmpty()) {
+            MonopolyMain.infoConsole.setText("You don't have any properties to sell. Ending your turn.");
+            MonopolyMain.btnNextTurn.setEnabled(true);
+            MonopolyMain.btnBuy.setEnabled(false);
+            MonopolyMain.btnPayRent.setEnabled(false);
+            MonopolyMain.btnRollDice.setEnabled(false);
+            return;
+        }
+
+        // Create a mapping from property index to property name
+        HashMap<Integer, String> propertyNames = new HashMap<>();
+        for (Integer propertyIndex : propertiesToSell) {
+            propertyNames.put(propertyIndex, gameBoard.getAllSquares().get(propertyIndex).getName());
+        }
+
+        // Convert the ArrayList to an array of property names for the dropdown
+        String[] propertyNamesArray = propertyNames.values().toArray(new String[0]);
+
+        // Show a dialog with a dropdown to select properties to sell
+        String selectedPropertyName = (String) JOptionPane.showInputDialog(
                 null,
                 "You need to sell properties to cover your debt. Select properties to sell:",
                 "Sell Properties",
-                JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                propertiesToSell.toArray(),
-                null);
+                propertyNamesArray,
+                propertyNamesArray[0]);  // Default to the first property
 
-        if (choice >= 0 && choice < propertiesToSell.size()) {
-            int propertyIndex = propertiesToSell.get(choice);
+        if (selectedPropertyName != null) {
+            // Find the property index based on the selected property name
+            int propertyIndex = getKeyByValue(propertyNames, selectedPropertyName);
             int propertyPrice = gameBoard.getAllSquares().get(propertyIndex).getPrice();
 
             // Sell the selected property
@@ -112,9 +135,35 @@ public class Player extends BoardObject {
             if (wallet < 0) {
                 // Player is still bankrupt after selling a property
                 handleBankruptcy();
+            } else {
+                // Player has successfully sold a property
+                MonopolyMain.btnNextTurn.setEnabled(true);
+                MonopolyMain.btnBuy.setEnabled(false);
+                MonopolyMain.btnPayRent.setEnabled(false);
+                MonopolyMain.btnRollDice.setEnabled(false);
             }
+        } else {
+            // Player canceled the selection, end the turn
+            MonopolyMain.infoConsole.setText("You canceled the sale. Ending your turn.");
+            MonopolyMain.btnNextTurn.setEnabled(true);
+            MonopolyMain.btnBuy.setEnabled(false);
+            MonopolyMain.btnPayRent.setEnabled(false);
+            MonopolyMain.btnRollDice.setEnabled(false);
         }
     }
+
+    // Helper method to find the key (property index) by its value (property name) in the HashMap
+    private int getKeyByValue(HashMap<Integer, String> map, String value) {
+        for (HashMap.Entry<Integer, String> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        return -1;  // Return -1 if the value is not found
+    }
+
+// ... Existing code ...
+
 
 
     public void depositToWallet(int depositAmount) {
@@ -136,6 +185,18 @@ public class Player extends BoardObject {
     }
 
     public void buyTitleDeed(int squareNumber) {
+
+        int propertyPrice = gameBoard.getAllSquares().get(squareNumber).getPrice();
+
+        if (wallet < propertyPrice) {
+            MonopolyMain.errorBox("You can't afford to buy " + gameBoard.getAllSquares().get(squareNumber).getName() + ". Ending your turn.", "Insufficient Funds");
+            MonopolyMain.btnNextTurn.setEnabled(true);
+            MonopolyMain.btnBuy.setEnabled(false);
+            MonopolyMain.btnPayRent.setEnabled(false);
+            MonopolyMain.btnRollDice.setEnabled(false);
+            return;
+        }
+
         if(ledger.containsKey(squareNumber)) {
             System.out.println("It's already bought by someone. You cannot by here.");
         } else {
